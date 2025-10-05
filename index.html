@@ -893,7 +893,7 @@ async function sendConfirmationSMS(phone, code, details) {
         const message = `Young Boys Party\nTicket Confirmed!\nCode: ${code}\nType: ${details.ticketType}\nQty: ${details.quantity}\nAmount: ₵${details.totalAmount}\nShow code at entrance.`;
         
         // Your Bulk SMS API configuration
-        const apiUrl = 'YOUR_BULK_SMS_API_LINK_HERE'; // ← INSERT YOUR API LINK HERE
+        const apiUrl = 'fb81d5a8-0d81-46ad-afc0-c85a125c957a'; // ← INSERT YOUR API LINK HERE
         
         const response = await fetch(apiUrl, {
             method: 'POST',
@@ -929,5 +929,6 @@ async function sendConfirmationSMS(phone, code, details) {
 </body>
 
 </html>
+
 
 

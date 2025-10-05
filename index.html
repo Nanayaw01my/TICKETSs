@@ -923,6 +923,44 @@ async function sendConfirmationSMS(phone, code, details) {
         // You can add fallback mechanisms here if SMS fails
     }
 }
+          // Send SMS via Bulk SMS API
+function sendConfirmationSMS(phone, code, details) {
+    // Format phone number for Ghana (remove leading 0 and add country code)
+    const formattedPhone = phone.startsWith('0') ? '233' + phone.substring(1) : phone;
+    
+    // SMS message content
+    const message = `Young Boys Party - Ticket Confirmation\nCode: ${code}\nTicket: ${details.ticketType}\nQuantity: ${details.quantity}\nAmount: ₵${details.totalAmount}\nPresent this code at the entrance.`;
+    
+    // BulkSMS Ghana API endpoint with your API key
+    const apiUrl = 'https://api.bulksmsgh.com/smsapi?key=fb81d5a8-0d81-46ad-afc0-c85a125c957a';
+    
+    // API request data for BulkSMS Ghana
+    const requestData = {
+        key: 'fb81d5a8-0d81-46ad-afc0-c85a125c957a',
+        to: formattedPhone,
+        msg: message,
+        sender_id: 'YoungBoys'
+    };
+    
+    // Make API call to send SMS
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('SMS sent successfully:', data);
+    })
+    .catch(error => {
+        console.error('Error sending SMS:', error);
+    });
+    
+    // Keep the console log for debugging
+    console.log(`SMS sent to ${phone}: ${message}`);
+}
     </script>
 
   

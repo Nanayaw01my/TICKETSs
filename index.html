@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventHub - Premium Event Ticketing</title>
+    <title>TechConnect 2023 - Premium Tech Conference</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -472,6 +472,24 @@
             color: var(--success);
             margin-bottom: 1.5rem;
         }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading i {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -480,7 +498,7 @@
         <div class="container header-content">
             <div class="logo">
                 <i class="fas fa-ticket-alt"></i>
-                EventHub
+                TechConnect
             </div>
             <nav>
                 <ul>
@@ -496,8 +514,8 @@
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="container hero-content">
-            <h1>Annual Tech Conference 2023</h1>
-            <p>Join industry leaders and innovators for a day of inspiration, networking, and cutting-edge insights into the future of technology.</p>
+            <h1>TechConnect Africa 2023</h1>
+            <p>Join industry leaders and innovators for a day of inspiration, networking, and cutting-edge insights into the future of technology across Africa.</p>
             <a href="#tickets" class="btn">Get Your Tickets Now</a>
         </div>
     </section>
@@ -573,7 +591,7 @@
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" class="form-control" required>
+                            <input type="tel" id="phone" class="form-control" placeholder="e.g., 0241234567" required>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -591,7 +609,7 @@
                                 <div class="total-amount">100 GHS</div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-accent" style="width: 100%;">Proceed to Payment</button>
+                        <button type="submit" class="btn btn-accent" style="width: 100%;" id="payButton">Proceed to Payment</button>
                     </form>
                 </div>
             </div>
@@ -603,8 +621,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>EventHub</h3>
-                    <p>Your premier destination for event ticketing. We make event registration simple and secure.</p>
+                    <h3>TechConnect</h3>
+                    <p>Your premier destination for tech event ticketing. We make event registration simple and secure.</p>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -624,17 +642,28 @@
                 <div class="footer-column">
                     <h3>Contact Us</h3>
                     <ul>
-                        <li><i class="fas fa-envelope"></i> info@eventhub.com</li>
-                        <li><i class="fas fa-phone"></i> +233 123 456 789</li>
+                        <li><i class="fas fa-envelope"></i> info@techconnect.com</li>
+                        <li><i class="fas fa-phone"></i> +233 24 123 4567</li>
                         <li><i class="fas fa-map-marker-alt"></i> Accra, Ghana</li>
                     </ul>
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; 2023 EventHub. All rights reserved.</p>
+                <p>&copy; 2023 TechConnect. All rights reserved.</p>
             </div>
         </div>
     </footer>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal">
+        <div class="modal-content">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <h3>Processing Payment</h3>
+                <p>Please wait while we process your transaction...</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Success Modal -->
     <div class="modal" id="successModal">
@@ -645,12 +674,17 @@
                 <h2 class="modal-title">Payment Successful!</h2>
                 <p>Thank you for your purchase. Your ticket has been reserved and a confirmation has been sent to your email and phone.</p>
                 <p>You will receive your e-ticket shortly.</p>
-                <button class="btn" style="margin-top: 1.5rem;">Close</button>
+                <button class="btn" style="margin-top: 1.5rem;" id="closeSuccess">Close</button>
             </div>
         </div>
     </div>
 
     <script>
+        // API Keys - Integrated with your provided keys
+        const paystackPublicKey = 'pk_live_6fe1f1cfd0d04104c4cd4ac4c7d822511de1009d';
+        const smsApiKey = 'fb81d5a8-0d81-46ad-afc0-c85a125c957a';
+        const smsSenderId = 'TechConnect';
+
         // Ticket quantity and total amount calculation
         document.getElementById('quantity').addEventListener('change', function() {
             const quantity = parseInt(this.value);
@@ -670,35 +704,113 @@
             const quantity = document.getElementById('quantity').value;
             const totalAmount = parseInt(quantity) * 100;
             
-            // In a real implementation, you would:
-            // 1. Initialize Paystack payment with the collected data
-            // 2. Process the payment
-            // 3. On successful payment, send SMS using Bulk SMS API
-            // 4. Show success message
+            // Validate phone number format
+            if (!/^0\d{9}$/.test(phone)) {
+                alert('Please enter a valid Ghanaian phone number (e.g., 0241234567)');
+                return;
+            }
             
-            // For demonstration, we'll simulate a successful payment
-            console.log('Processing payment via Paystack...');
-            console.log(`Customer: ${name}, Email: ${email}, Phone: ${phone}`);
-            console.log(`Quantity: ${quantity}, Amount: ${totalAmount} GHS`);
+            // Show loading modal
+            document.getElementById('loadingModal').style.display = 'flex';
             
-            // Simulate API calls
-            setTimeout(function() {
-                // Show success modal
-                document.getElementById('successModal').style.display = 'flex';
-                
-                // In a real implementation, you would:
-                // - Send confirmation email
-                // - Send SMS using Bulk SMS API
-                console.log('Sending SMS confirmation via Bulk SMS API...');
-            }, 1500);
+            // Initialize Paystack payment
+            const handler = PaystackPop.setup({
+                key: paystackPublicKey,
+                email: email,
+                amount: totalAmount * 100, // Amount in kobo
+                currency: 'GHS',
+                ref: 'TC-' + Math.floor((Math.random() * 1000000000) + 1),
+                metadata: {
+                    custom_fields: [
+                        {
+                            display_name: "Full Name",
+                            variable_name: "full_name",
+                            value: name
+                        },
+                        {
+                            display_name: "Phone Number", 
+                            variable_name: "phone_number",
+                            value: phone
+                        },
+                        {
+                            display_name: "Ticket Quantity",
+                            variable_name: "ticket_quantity", 
+                            value: quantity
+                        }
+                    ]
+                },
+                callback: function(response) {
+                    // Hide loading modal
+                    document.getElementById('loadingModal').style.display = 'none';
+                    
+                    if(response.status === 'success') {
+                        // Payment successful - Send SMS confirmation
+                        sendConfirmationSMS(name, phone, quantity, response.reference);
+                        
+                        // Show success modal
+                        document.getElementById('successModal').style.display = 'flex';
+                        
+                        // Reset form
+                        document.getElementById('ticketForm').reset();
+                        document.querySelector('.total-amount').textContent = '100 GHS';
+                    } else {
+                        alert('Payment failed. Please try again.');
+                    }
+                },
+                onClose: function() {
+                    // Hide loading modal if payment window is closed
+                    document.getElementById('loadingModal').style.display = 'none';
+                    alert('Payment window closed.');
+                }
+            });
+            
+            handler.openIframe();
         });
+
+        // Function to send confirmation SMS
+        function sendConfirmationSMS(name, phone, quantity, reference) {
+            // Format phone number for SMS (Ghanaian number)
+            const formattedPhone = '233' + phone.substring(1);
+            
+            // SMS message content
+            const message = `Hello ${name}! Thank you for purchasing ${quantity} ticket(s) for TechConnect Africa 2023. Your booking reference is ${reference}. See you on Dec 2 at Accra International Conference Centre!`;
+            
+            // Send SMS via BulkSMS.com API (example implementation)
+            // Note: You'll need to adjust this based on your specific SMS provider's API
+            fetch('https://api.bulksms.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(smsApiKey + ':x')
+                },
+                body: JSON.stringify({
+                    to: formattedPhone,
+                    body: message,
+                    from: smsSenderId
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('SMS sending failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('SMS sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error sending SMS:', error);
+                // In a real implementation, you might want to log this error
+                // but not show it to the user since payment was successful
+            });
+        }
 
         // Modal close functionality
         document.querySelector('.close-modal').addEventListener('click', function() {
             document.getElementById('successModal').style.display = 'none';
         });
         
-        document.querySelector('#successModal .btn').addEventListener('click', function() {
+        document.getElementById('closeSuccess').addEventListener('click', function() {
             document.getElementById('successModal').style.display = 'none';
         });
 
@@ -718,5 +830,8 @@
             });
         });
     </script>
+    
+    <!-- Paystack Inline JS -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
 </body>
 </html>

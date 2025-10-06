@@ -564,7 +564,7 @@
                         <p>Full Access Pass</p>
                     </div>
                     <div class="ticket-price">
-                        100 <span>GHS</span>
+                        0.10 <span>GHS</span>
                     </div>
                     <div class="ticket-features">
                         <ul>
@@ -606,7 +606,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Total Amount</label>
-                                <div class="total-amount">100 GHS</div>
+                                <div class="total-amount">0.10 GHS</div>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-accent" style="width: 100%;" id="payButton">Proceed to Payment</button>
@@ -683,12 +683,12 @@
         // API Keys - Integrated with your provided keys
         const paystackPublicKey = 'pk_live_6fe1f1cfd0d04104c4cd4ac4c7d822511de1009d';
         const smsApiKey = 'fb81d5a8-0d81-46ad-afc0-c85a125c957a';
-        const smsSenderId = 'TechConnect';
+        const smsSenderId = 'iTtEk';
 
         // Ticket quantity and total amount calculation
         document.getElementById('quantity').addEventListener('change', function() {
             const quantity = parseInt(this.value);
-            const ticketPrice = 100;
+            const ticketPrice = 0.10;
             const totalAmount = quantity * ticketPrice;
             document.querySelector('.total-amount').textContent = totalAmount + ' GHS';
         });
@@ -702,7 +702,7 @@
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
             const quantity = document.getElementById('quantity').value;
-            const totalAmount = parseInt(quantity) * 100;
+            const totalAmount = parseInt(quantity) * 0.10;
             
             // Validate phone number format
             if (!/^0\d{9}$/.test(phone)) {
@@ -717,7 +717,7 @@
             const handler = PaystackPop.setup({
                 key: paystackPublicKey,
                 email: email,
-                amount: totalAmount * 100, // Amount in kobo
+                amount: totalAmount * 0.10, // Amount in kobo
                 currency: 'GHS',
                 ref: 'TC-' + Math.floor((Math.random() * 1000000000) + 1),
                 metadata: {
@@ -752,7 +752,7 @@
                         
                         // Reset form
                         document.getElementById('ticketForm').reset();
-                        document.querySelector('.total-amount').textContent = '100 GHS';
+                        document.querySelector('.total-amount').textContent = '0.10 GHS';
                     } else {
                         alert('Payment failed. Please try again.');
                     }
@@ -835,3 +835,4 @@
     <script src="https://js.paystack.co/v1/inline.js"></script>
 </body>
 </html>
+

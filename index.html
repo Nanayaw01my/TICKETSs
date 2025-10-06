@@ -895,8 +895,81 @@
                 purchaseBtn.disabled = false;
             }
         });
+
+
+
+
+          <?php
+class BulkSMSIntegration {
+    private $apiKey;
+    private $senderId;
+    private $baseUrl;
+    
+    public function __construct($apiKey, $senderId, $baseUrl = 'https://api.bulksms.com/v1/') {
+        $this->apiKey = $apiKey;
+        $this->senderId = $senderId;
+        $this->baseUrl = $baseUrl;
+    }
+    
+    public function sendSMS($phoneNumber, $message) {
+        // Prepare the data
+        $data = [
+            'to' => $phoneNumber,
+            'body' => $message,
+            'from' => $this->senderId
+        ];
+        
+        // Initialize cURL
+        $ch = curl_init($this->baseUrl . 'messages');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->apiKey
+        ]);
+        
+        // Execute the request
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        return [
+            'success' => ($httpCode >= 200 && $httpCode < 300),
+            'response' => json_decode($response, true),
+            'status_code' => $httpCode
+        ];
+    }
+    
+    public function sendBulkSMS($recipients, $message) {
+        $results = [];
+        foreach ($recipients as $recipient) {
+            $results[] = $this->sendSMS($recipient, $message);
+        }
+        return $results;
+    }
+}
+
+// Usage Example
+$apiKey = "68fcf5c1-8d98-4852-ae85-cde2ce872d9c";
+$senderId = "iTtEk"; // Usually your company name
+$sms = new BulkSMSIntegration($apiKey, $senderId);
+
+// Send single SMS
+$result = $sms->sendSMS("+1234567890", "Hello from our website!");
+if ($result['success']) {
+    echo "SMS sent successfully!";
+} else {
+    echo "Failed to send SMS: " . $result['response']['error'];
+}
+
+// Send bulk SMS
+$recipients = ["+1234567890", "+0987654321", "+1122334455"];
+$bulkResult = $sms->sendBulkSMS($recipients, "Bulk message test");
+?>
     </script>
 
   
 </body>
 </html>
+

@@ -961,12 +961,114 @@ function sendConfirmationSMS(phone, code, details) {
     // Keep the console log for debugging
     console.log(`SMS sent to ${phone}: ${message}`);
 }
+          // Replace your current SMS function with this single, improved version
+async function sendConfirmationSMS(phone, code, details) {
+    try {
+        console.log(`Attempting to send SMS to: ${phone}`);
+        
+        // Format phone number for Ghana
+        const formattedPhone = phone.startsWith('0') ? '233' + phone.substring(1) : phone.replace(/\D/g, '');
+        
+        // Validate phone number
+        if (!/^233[2359]\d{8}$/.test(formattedPhone)) {
+            console.error('Invalid Ghana phone number format:', formattedPhone);
+            return false;
+        }
+        
+        // Create SMS message
+        const message = `Young Boys Party\n🎉 TICKET CONFIRMED!\nCode: ${code}\nType: ${details.ticketType}\nQty: ${details.quantity}\nAmount: ₵${details.totalAmount}\nShow this code at entrance.`;
+        
+        // BulkSMS Ghana API configuration
+        const apiKey = 'fb81d5a8-0d81-46ad-afc0-c85a125c957a';
+        const apiUrl = `https://api.bulksmsgh.com/smsapi?key=${apiKey}&to=${formattedPhone}&msg=${encodeURIComponent(message)}&sender_id=YoungBoys`;
+        
+        console.log('Sending SMS via:', apiUrl);
+        
+        // Send SMS using BulkSMS Ghana API
+        const response = await fetch(apiUrl, {
+            method: 'GET', // BulkSMS Ghana typically uses GET requests
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.text();
+            console.log('SMS API Response:', result);
+            
+            // Check if SMS was sent successfully
+            if (result.includes('Message sent') || result.includes('1801')) {
+                console.log('✅ SMS sent successfully to', phone);
+                return true;
+            } else {
+                console.error('❌ SMS failed:', result);
+                return false;
+            }
+        } else {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+    } catch (error) {
+        console.error('❌ SMS sending failed:', error);
+        
+        // Fallback: Log the SMS that would have been sent
+        console.log('📱 SMS CONTENT (Fallback):', {
+            to: phone,
+            message: `Young Boys Party - Ticket Confirmation - Code: ${code} - Type: ${details.ticketType} - Qty: ${details.quantity} - Amount: ₵${details.totalAmount}`
+        });
+        
+        return false;
+    }
+}
+
+// Update your Paystack callback to handle SMS properly
+// In your Paystack callback function, replace the SMS section with:
+callback: function(response) {
+    // Payment successful
+    console.log('Payment successful:', response);
+    
+    // Generate confirmation code
+    const confirmationCode = generateConfirmationCode();
+    
+    // Store confirmation data
+    currentConfirmationData = {
+        code: confirmationCode,
+        fullName: formData.fullName,
+        phone: formData.phone,
+        ticketType: formData.ticketType,
+        quantity: formData.quantity,
+        totalAmount: formData.totalAmount,
+        reference: response.reference
+    };
+    
+    // Send SMS with confirmation code
+    sendConfirmationSMS(formData.phone, confirmationCode, {
+        ticketType: formData.ticketType,
+        quantity: formData.quantity,
+        totalAmount: formData.totalAmount,
+        fullName: formData.fullName
+    }).then(smsSent => {
+        if (smsSent) {
+            console.log('SMS delivered successfully');
+        } else {
+            console.log('SMS failed, but ticket was purchased');
+            // You might want to show a warning to the user
+        }
+    });
+    
+    // Show confirmation modal
+    showConfirmationModal(confirmationCode, formData);
+    
+    // Reset form
+    resetForm();
+},
     </script>
 
   
 </body>
 
 </html>
+
 
 
 
